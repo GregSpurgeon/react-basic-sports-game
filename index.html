@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Basic Sports Game</title>
+</head>
+<body>
+  <div id="root"></div>
+
+<script type="text/babel">
+
+function Team(props){
+  const {numShots,score,percentMade,} =props.data;
+  console.log(props)
+          return(
+            <React.Fragment>
+              <h3>{props.name}<br/> {props.logo}</h3>
+              <button id="shoot" onClick ={props.handleShoot}>Shoot</button>
+              <p>Shots <br/>{numShots}</p>
+              <p>Shot Percentage<br/>{percentMade}% </p>
+              <p>Score: <br />{score} </p>
+            </React.Fragment>
+          ); 
+}
+
+      
+class Game extends React.Component{
+  constructor(props){
+      super(props);
+      this.state={
+        venue: props.venue,
+        count:0,
+        Team1:{
+          name:props.Team1Name,
+          logo:props.Team1Logo,
+          numShots:0,
+          score: 0,
+          percentMade: null,
+          },
+        Team2:{
+          name:props.Team2Name,
+          logo:props.Team2Logo,
+          numShots: 0,
+          score: 0,
+          percentMade: null,
+          },
+          
+      }
+    };
+resetCounter=(team)=>{
+  this.setState((state,props) =>{
+      return{
+        ...state,
+        count: state.count + 1,
+        Team1:{
+                ...state.Team1,
+                  numShots:0,
+                  score:0,
+                  percentMade:null,
+         },
+         Team2:{
+                ...state.Team2,
+                  numShots:0,
+                  score:0,
+                  percentMade:null,
+         }
+      }
+    })
+}
+    swish = new Audio('./Swish+2.wav')
+    cheering = new Audio('./cheering1.wav')
+
+    shotsTaken = (team) =>{
+          this.setState((state,props) =>{
+            console.log(this.state)
+            return{
+              ...state,
+              [team]:{
+                ...state[team],
+                numShots: state[team].numShots + 1
+              }
+            };
+          });
+          this.cheering.play()
+        }
+        
+    scoreABucket = (team) =>{
+          this.setState((state,props) =>{
+            return{
+              ...state,
+              [team]:{
+                ...state[team],
+              score: state[team].score + 2
+              }
+            };
+          });
+          setTimeout(()=>this.swish.play(),3700)
+        }
+
+    ShotPercentage=(team)=>{
+        this.setState((state,props) =>{
+          return{
+              ...state,
+              [team]:{
+                ...state[team],
+                percentMade: Math.round(( (state[team].score/2) / state[team].numShots) * 100)
+              }
+            };
+          });
+        }
+        
+    handleShoot =(team)=>{
+          this.shotsTaken(team)
+          if(Math.random() <=.4){
+            this.scoreABucket(team)
+          }
+          this.ShotPercentage(team)
+        }
+    render(){
+      const {count}= this.state;
+    return( 
+        <React.Fragment>
+         <h2>Welcome to {this.props.venue}</h2>
+         <div className="scoreBoard">
+          <p className="Home"> 
+            <Team data={this.state.Team1} 
+            name={this.props.Team1Name} 
+            logo={this.props.Team1Logo} 
+            handleShoot={()=>{this.handleShoot("Team1")}}/>
+            </p>
+          <p className="Away"> 
+            <Team data={this.state.Team2} 
+            name={this.props.Team2Name}
+            logo={this.props.Team2Logo}
+            handleShoot={()=>{this.handleShoot("Team2")}}/>
+            </p>   
+           <p> <button id="reset" onClick={this.resetCounter}>Reset Game</button>
+            <br/>{count}
+            </p>
+          </div>
+        </React.Fragment>
+      );
+    }
+}
+   
+class App extends React.Component{
+  render(){
+    return (
+      <div>
+        <Game venue="Smoothie King Stadium" Team1Name="Warriors" Team2Name="Wildcats" 
+          Team1Logo={<img src="./warriorLogo.jpg" />}
+          Team2Logo={<img src="./wildcatLogo.jpg" />}
+          />
+          <Game venue="Hops & Fire Arena" Team1Name="Sharks" Team2Name="Pioneers"
+          Team1Logo={<img src="./sharksLogo.jpg" />}
+          Team2Logo={<img src="./pioneerLogo.gif" />}
+          />
+          <Game venue="The Thunder Dome" Team1Name="Bulldogs" Team2Name="Raptors"
+          Team1Logo={<img src="./bulldogsLogo.png" />}
+          Team2Logo={<img src="./raptorsLogo.jpg"/>}
+          />
+          </div>
+      
+    )
+  }
+}
+
+ReactDOM.render(<App/>, document.getElementById("root"))
+</script>
+</body>
+</html>
